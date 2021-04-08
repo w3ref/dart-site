@@ -11,8 +11,10 @@ import 'dart:io';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_static/shelf_static.dart';
 
+const port = 4046;
+
 Future<void> main() async {
   var handler = createStaticHandler('.');
 
-  await io.serve(handler, InternetAddress.loopbackIPv4, 4046);
+  await io.serve(handler, InternetAddress.loopbackIPv4, port);
 }

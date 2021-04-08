@@ -138,54 +138,46 @@ void main() {
   final indexHtml = indexFile.readAsStringSync();
 
   test('mini_file_server', () {
-    _server() => mini_file_server.main();
-
-    _test() async {
-      expect(await getUrl('localhost', 4044), indexHtml);
+    Future<void> _test() async {
+      expect(await getUrl('localhost', mini_file_server.port), indexHtml);
     }
 
     expect(
-        () => Future.any([
-              _server(),
-              _test(),
-            ]),
-        prints('Serving ${indexFile.path}.\n'));
+      () => Future.wait([
+        mini_file_server.main(),
+        _test(),
+      ]),
+      prints('Serving ${indexFile.path}.\n'),
+    );
   });
 
   test('basic_file_server', () async {
-    _server() => basic_file_server.main();
-
-    _test() async {
-      expect(await getUrl('localhost', 4046), indexHtml);
+    Future<void> _test() async {
+      expect(await getUrl('localhost', basic_file_server.port), indexHtml);
     }
 
     await Future.any([
-      _server(),
+      basic_file_server.main(),
       _test(),
     ]);
   });
 
   test('static_file_server', () {
-    const port = 4048;
-
-    _server() => static_file_server.main();
-
-    _test() async {
-      expect(await getUrl('localhost', port), indexHtml);
+    Future<void> _test() async {
+      expect(await getUrl('localhost', static_file_server.port), indexHtml);
     }
 
     expect(
-        () => Future.any([
-              _server(),
-              _test(),
-            ]),
-        prints(startsWith('Listening on port $port')));
+      () => Future.any([
+        static_file_server.main(),
+        _test(),
+      ]),
+      prints(startsWith('Listening on port ${static_file_server.port}')),
+    );
   });
 
   test('note_server', () {
-    _server() => note_server.main();
-
-    _test() async {
+    Future<void> _test() async {
       final json = '{"getNote": "0"}';
       final quote = 'Be yourself. Everyone else is taken.\n';
       final resp = await postUrl(
@@ -199,15 +191,13 @@ void main() {
 
     expect(
         () => Future.any([
-              _server(),
+              note_server.main(),
               _test(),
             ]),
         prints(startsWith('Listening for requests on ${note_server.port}')));
   });
 
   test('hello_world_server_secure', () {
-    const port = 4047;
-
     _server() {
       hello_world_server_secure.certificateChain =
           'bin/' + hello_world_server_secure.certificateChain;
@@ -218,18 +208,21 @@ void main() {
 
     _test() async {
       final client = HttpClient();
-      final url = Uri.https('localhost:$port', '');
+      final url = Uri.https('localhost:${hello_world_server_secure.port}', '');
       final response = await client.getUrl(url);
       // expect(..., 'Hello, world!');
       await response.close();
     }
 
     expect(
-        () => Future.any([
-              _server(),
-              _test(),
-            ]),
-        prints(startsWith('Listening on localhost:$port')));
+      () => Future.any([
+        _server(),
+        _test(),
+      ]),
+      prints(
+        startsWith('Listening on localhost:${hello_world_server_secure.port}'),
+      ),
+    );
   }, skip: 'https://github.com/dart-lang/site-www/issues/468');
 }
 

@@ -16,6 +16,8 @@ import 'dart:io';
 String certificateChain = 'server_chain.pem';
 String serverKey = 'server_key.pem';
 
+const port = 4047;
+
 Future main() async {
   var serverContext = SecurityContext(); /*1*/
   serverContext.useCertificateChain(certificateChain); /*2*/
@@ -23,7 +25,7 @@ Future main() async {
 
   var server = await HttpServer.bindSecure(
     'localhost',
-    4047,
+    port,
     serverContext, /*4*/
   );
   print('Listening on localhost:${server.port}');

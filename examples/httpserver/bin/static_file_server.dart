@@ -11,12 +11,14 @@ import 'dart:io';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_static/shelf_static.dart';
 
+const port = 4048;
+
 Future<void> main() async {
   var handler = createStaticHandler(
     'web',
     defaultDocument: 'index.html',
   );
 
-  await io.serve(handler, InternetAddress.loopbackIPv4, 4048);
+  await io.serve(handler, InternetAddress.loopbackIPv4, port);
   print('Listening on port 4048');
 }
