@@ -5,33 +5,33 @@
 // Client program is note_client.dart.
 // Use note_taker.html to run the client.
 
-import 'dart:io';
 import 'dart:convert' show utf8, json;
+import 'dart:io';
 
-const noteFilePath = 'data/notes.txt';
-int count = 0;
+const port = 4042;
+const _noteFilePath = 'data/notes.txt';
+int _count = 0;
 
-Future main() async {
+Future<void> main() async {
   // One note per line.
   try {
-    List<String> lines = File(noteFilePath).readAsLinesSync();
-    count = lines.length;
+    List<String> lines = File(_noteFilePath).readAsLinesSync();
+    _count = lines.length;
   } on FileSystemException {
-    print('Could not open $noteFilePath.');
+    print('Could not open $_noteFilePath.');
     return;
   }
 
-  var server =
-      await HttpServer.bind(InternetAddress.loopbackIPv4, 4042);
-  print('Listening for requests on 4042.');
-  await listenForRequests(server);
+  var server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
+  print('Listening for requests on $port.');
+  await _listenForRequests(server);
 }
 
-Future listenForRequests(HttpServer requests) async {
+Future _listenForRequests(HttpServer requests) async {
   await for (HttpRequest request in requests) {
     switch (request.method) {
       case 'POST':
-        await handlePost(request);
+        await _handlePost(request);
         break;
       case 'OPTION':
         handleOptions(request);
@@ -41,19 +41,16 @@ Future listenForRequests(HttpServer requests) async {
         break;
     }
   }
-  print('No more requests.');
 }
 
-Future handlePost(HttpRequest request) async {
+Future _handlePost(HttpRequest request) async {
   Map decoded;
 
-  addCorsHeaders(request.response);
+  _addCorsHeaders(request.response);
 
   try {
-    decoded = await utf8.decoder
-        .bind(request)
-        .transform(json.decoder)
-        .first as Map;
+    decoded =
+        await utf8.decoder.bind(request).transform(json.decoder).first as Map;
   } catch (e) {
     print('Request listen error: $e');
     return;
@@ -68,10 +65,9 @@ Future handlePost(HttpRequest request) async {
 
 void saveNote(HttpRequest request, String myNote) {
   try {
-    File(noteFilePath)
-        .writeAsStringSync(myNote, mode: FileMode.append);
+    File(_noteFilePath).writeAsStringSync(myNote, mode: FileMode.append);
   } catch (e) {
-    print('Couldn\'t open $noteFilePath: $e');
+    print("Couldn't open $_noteFilePath: $e");
     request.response
       ..statusCode = HttpStatus.internalServerError
       ..writeln('Couldn\'t save note.')
@@ -79,17 +75,17 @@ void saveNote(HttpRequest request, String myNote) {
     return;
   }
 
-  count++;
+  _count++;
   request.response
     ..statusCode = HttpStatus.ok
-    ..writeln('You have $count notes.')
+    ..writeln('You have $_count notes.')
     ..close();
 }
 
 void readNote(HttpRequest request, String getNote) {
   final requestedNote = int.tryParse(getNote) ?? 0;
-  if (requestedNote >= 0 && requestedNote < count) {
-    List<String> lines = File(noteFilePath).readAsLinesSync();
+  if (requestedNote >= 0 && requestedNote < _count) {
+    List<String> lines = File(_noteFilePath).readAsLinesSync();
     request.response
       ..statusCode = HttpStatus.ok
       ..writeln(lines[requestedNote])
@@ -99,7 +95,7 @@ void readNote(HttpRequest request, String getNote) {
 
 void defaultHandler(HttpRequest request) {
   final response = request.response;
-  addCorsHeaders(response);
+  _addCorsHeaders(response);
   response
     ..statusCode = HttpStatus.notFound
     ..write('Not found: ${request.method}, ${request.uri.path}')
@@ -108,7 +104,7 @@ void defaultHandler(HttpRequest request) {
 
 void handleOptions(HttpRequest request) {
   final response = request.response;
-  addCorsHeaders(response);
+  _addCorsHeaders(response);
   print('${request.method}: ${request.uri.path}');
   response
     ..statusCode = HttpStatus.noContent
@@ -116,10 +112,9 @@ void handleOptions(HttpRequest request) {
 }
 
 // #docregion addCorsHeaders
-void addCorsHeaders(HttpResponse response) {
+void _addCorsHeaders(HttpResponse response) {
   response.headers.add('Access-Control-Allow-Origin', '*');
-  response.headers
-      .add('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS');
   response.headers.add('Access-Control-Allow-Headers',
       'Origin, X-Requested-With, Content-Type, Accept');
 }

@@ -15,7 +15,7 @@ String _host = InternetAddress.loopbackIPv4.host;
 Future main() async {
   var server = await HttpServer.bind(_host, 4049);
   await for (var req in server) {
-    ContentType contentType = req.headers.contentType;
+    ContentType? contentType = req.headers.contentType;
     HttpResponse response = req.response;
 
     if (req.method == 'POST' &&

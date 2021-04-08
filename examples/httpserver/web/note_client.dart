@@ -6,23 +6,18 @@
 
 import 'dart:html';
 
-String note;
+final noteTextInput = querySelector('#note_entry') as TextInputElement;
+final howManyNotes =
+    querySelector('#display_how_many_notes') as ParagraphElement;
+final chooseNote = querySelector('#choose_note') as TextInputElement;
+final displayNote = querySelector('#display_note') as ParagraphElement;
 
-TextInputElement noteTextInput;
-ParagraphElement howManyNotes;
-TextInputElement chooseNote;
-ParagraphElement displayNote;
-HttpRequest request;
+late HttpRequest request;
 String url = 'http://localhost:4042';
 
 void main() {
-  noteTextInput = querySelector('#note_entry') as TextInputElement;
-  howManyNotes = querySelector('#display_how_many_notes') as ParagraphElement;
-  chooseNote = querySelector('#choose_note') as TextInputElement;
-  displayNote = querySelector('#display_note') as ParagraphElement;
-
-  querySelector('#save_note').onClick.listen(saveNote);
-  querySelector('#get_note').onClick.listen(requestNote);
+  querySelector('#save_note')!.onClick.listen(saveNote);
+  querySelector('#get_note')!.onClick.listen(requestNote);
 }
 
 void saveNote(Event e) {
@@ -34,9 +29,9 @@ void saveNote(Event e) {
 }
 
 void requestNote(Event e) {
-  if (chooseNote.value.isEmpty) return;
+  if (chooseNote.value!.isEmpty) return;
 
-  int getNoteNumber = int.tryParse(chooseNote.value) ?? 0;
+  int getNoteNumber = int.tryParse(chooseNote.value!) ?? 0;
 
   request = HttpRequest();
   request.onReadyStateChange.listen(onData);
@@ -47,7 +42,7 @@ void requestNote(Event e) {
 
 void onData(_) {
   if (request.readyState == HttpRequest.DONE && request.status == 200) {
-    if (request.responseText.startsWith('You')) {
+    if (request.responseText!.startsWith('You')) {
       howManyNotes.text = request.responseText;
     } else {
       displayNote.text = request.responseText;

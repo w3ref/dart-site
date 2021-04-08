@@ -7,17 +7,16 @@
 /// Visit http://localhost:4048 into your browser.
 // #docregion
 import 'dart:io';
-import 'package:http_server/http_server.dart';
 
-Future main() async {
-  var staticFiles = VirtualDirectory('web');
-  staticFiles.allowDirectoryListing = true; /*1*/
-  staticFiles.directoryHandler = (dir, request) /*2*/ {
-    var indexUri = Uri.file(dir.path).resolve('index.html');
-    staticFiles.serveFile(File(indexUri.toFilePath()), request); /*3*/
-  };
+import 'package:shelf/shelf_io.dart' as io;
+import 'package:shelf_static/shelf_static.dart';
 
-  var server = await HttpServer.bind(InternetAddress.loopbackIPv4, 4048);
+Future<void> main() async {
+  var handler = createStaticHandler(
+    'web',
+    defaultDocument: 'index.html',
+  );
+
+  await io.serve(handler, InternetAddress.loopbackIPv4, 4048);
   print('Listening on port 4048');
-  await server.forEach(staticFiles.serveRequest); /*4*/
 }

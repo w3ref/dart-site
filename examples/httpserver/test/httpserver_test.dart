@@ -1,7 +1,9 @@
 @TestOn("vm")
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:test/test.dart';
+
 import '../bin/basic_file_server.dart' as basic_file_server;
 import '../bin/basic_writer_client.dart' as basic_writer_client;
 import '../bin/basic_writer_server.dart' as basic_writer_server;
@@ -32,7 +34,7 @@ void main() {
   group('number_thinker and number_guesser:', () {
     // Only resolve the server once for all tests in this group to avoid
     // "binding multiple times on the same (address, port) combination".
-    Future _server;
+    Future? _server;
     Future startServer() => _server ??= number_thinker.main();
 
     test('number_thinker response', () {
@@ -181,18 +183,16 @@ void main() {
   });
 
   test('note_server', () {
-    const port = 4042;
-
     _server() => note_server.main();
 
     _test() async {
       final json = '{"getNote": "0"}';
       final quote = 'Be yourself. Everyone else is taken.\n';
       final resp = await postUrl(
-        json.toString(),
+        json,
         ContentType.json,
         'localhost',
-        port,
+        note_server.port,
       );
       expect(resp, quote);
     }
@@ -202,7 +202,7 @@ void main() {
               _server(),
               _test(),
             ]),
-        prints(startsWith('Listening for requests on $port')));
+        prints(startsWith('Listening for requests on ${note_server.port}')));
   });
 
   test('hello_world_server_secure', () {

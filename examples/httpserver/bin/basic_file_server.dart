@@ -7,16 +7,12 @@
 /// Visit http://localhost:4046 into your browser.
 // #docregion
 import 'dart:io';
-import 'package:http_server/http_server.dart';
 
-File targetFile = File('web/index.html');
+import 'package:shelf/shelf_io.dart' as io;
+import 'package:shelf_static/shelf_static.dart';
 
-Future main() async {
-  VirtualDirectory staticFiles = VirtualDirectory('.');
+Future<void> main() async {
+  var handler = createStaticHandler('.');
 
-  var serverRequests =
-      await HttpServer.bind(InternetAddress.loopbackIPv4, 4046);
-  await for (var request in serverRequests) {
-    staticFiles.serveFile(targetFile, request);
-  }
+  await io.serve(handler, InternetAddress.loopbackIPv4, 4046);
 }
