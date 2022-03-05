@@ -4,10 +4,10 @@ on:
   # Run on PRs and pushes to the default branch.
   push:
     branches:
-      - main
+      - main-ru
   pull_request:
     branches:
-      - main
+      - main-ru
   schedule:
     - cron: "0 0 * * 0"
 
@@ -42,8 +42,8 @@ jobs:
 
   deploy:
     if: ${{ github.event_name == 'push' && 
-            github.ref == 'refs/heads/main' && 
-            github.repository == 'dart-lang/site-www' }}
+            github.ref == 'refs/heads/main-ru' && 
+            github.repository == 'w3ref/dart-site' }}
     needs: test
     runs-on: ubuntu-latest
     env:
